@@ -2,17 +2,24 @@ import db from "../connect.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 export const registeruser=(req,res)=>{
-    const q="INSERT INTO users(`name`,`username`,`email`,`password`) values(?)"
-    const salt=10;
-     bcrypt.hash(req.body.password,salt,(err,hash)=>{
+    const getquery="SELECT * FROM users WHERE username=? OR email=?"
+    db.query(getquery,[req.body.username,req.body.email],(err,data)=>{
+        if(err)
+            return res.json(err).status(400)
+        if(data.length>0)
+            return res.json("username or email registered already").status(401)
+        const q="INSERT INTO users(`name`,`username`,`email`,`password`) values(?)"
+       const salt=10;
+       bcrypt.hash(req.body.password,salt,(err,hash)=>{
         if(err)
             return res.json(err).status(403)
         const values=[req.body.name,req.body.username,req.body.email,hash]
         db.query(q,[values],(err,data)=>{
             if(err)
                 res.json(err).status(500)
-            res.json(data).status(201)
+            res.json({...data,"message":"user registered"}).status(201)
         })
+    })
     })
 }
 export const loginuser=(req,res)=>{
