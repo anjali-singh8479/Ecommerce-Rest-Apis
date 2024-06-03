@@ -4,8 +4,9 @@ import dotenv from "dotenv"
 import cookieParser from "cookie-parser"
 import authRoutes from "./routes/auth.js"
 import userRoutes from "./routes/user.js"
-dotenv.config()
+
 const app=express();
+dotenv.config()
 app.use(express.json())
 app.use(cors())
 app.use(cookieParser())

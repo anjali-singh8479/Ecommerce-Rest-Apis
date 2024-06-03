@@ -8,12 +8,13 @@ export const registeruser=(req,res)=>{
             return res.json(err).status(400)
         if(data.length>0)
             return res.json("username or email registered already").status(401)
-        const q="INSERT INTO users(`name`,`username`,`email`,`password`) values(?)"
+        const q="INSERT INTO users(`name`,`username`,`email`,`password`,`joinedin`) values(?)"
        const salt=10;
        bcrypt.hash(req.body.password,salt,(err,hash)=>{
         if(err)
             return res.json(err).status(403)
-        const values=[req.body.name,req.body.username,req.body.email,hash]
+        const month=new Date();
+        const values=[req.body.name,req.body.username,req.body.email,hash,month]
         db.query(q,[values],(err,data)=>{
             if(err)
                 res.json(err).status(500)
@@ -34,7 +35,9 @@ export const loginuser=(req,res)=>{
                 return res.json(err).status(400)
             if(!response)
                 res.json("Incorrect password").status(401)
-            const token=jwt.sign(data[0].id,process.env.JWT_SECRET)
+            const token=jwt.sign(
+                {"id":data[0].id,"isadmin":data[0].isadmin},
+               process.env.JWT_SECRET)
             res.cookie("token",token)
             const{password,...others}=data[0]
             return res.json(others).status(200)
